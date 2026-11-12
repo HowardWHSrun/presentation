@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calcium Indicators (presenter)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #fff; color: #111; overflow: hidden;
+    font-family: Helvetica, Arial, sans-serif; }
+  #viewport { position: fixed; inset: 0; background: #fff; }
+  #stage { position: absolute; left: 50%; top: 50%; width: 1280px; height: 720px;
+    transform-origin: 0 0; background: #fff; }
+  .slide { position: absolute; inset: 0; padding: 64px 80px 72px; display: none;
+    flex-direction: column; gap: 32px; background: #fff; }
+  .slide.active { display: flex; }
+  h1 { font-size: 80px; font-weight: 700; line-height: 1.05; }
+  h2 { font-size: 50px; font-weight: 700; line-height: 1.1; }
+  h3 { font-size: 26px; font-weight: 700; line-height: 1.25; }
+  p, li, td, th { font-size: 23px; line-height: 1.4; }
+  .muted { color: #555; }
+  .small { font-size: 20px; }
+  .lead { font-size: 32px; line-height: 1.3; color: #333; }
+  .source { position: absolute; left: 80px; right: 160px; bottom: 28px; font-size: 15px; color: #666; }
+  .num { position: absolute; right: 80px; bottom: 28px; font-size: 14px; color: #666; }
+  .row { display: flex; gap: 20px; align-items: stretch; }
+  .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .box { flex: 1; border: 1px solid #bbb; border-radius: 10px; padding: 22px 24px;
+    display: flex; flex-direction: column; gap: 8px; }
+  .box.fill { background: #111; color: #fff; border-color: #111; justify-content: center; }
+  .box.mid { justify-content: center; }
+  .arrow { flex: none; align-self: center; font-size: 30px; line-height: 1; }
+  .arrow.gray { color: #aaa; }
+  .big { font-size: 58px; font-weight: 700; line-height: 1.1; }
+  .step { font-size: 15px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+  .pill { font-size: 19px; font-weight: 700; padding: 8px 16px; border-radius: 999px; background: #e5e5e5; white-space: nowrap; }
+  .pill.dark { background: #555; color: #fff; }
+  .gfp { width: 150px; height: 104px; border-radius: 18px; display: flex; align-items: center;
+    justify-content: center; font-size: 24px; font-weight: 700; background: #bbb; }
+  .gfp.on { background: #2fcb73; box-shadow: 0 0 30px 6px rgba(47,203,115,.5); }
+  .state { display: flex; gap: 10px; align-items: center; justify-content: center; height: 124px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 11px 18px; border-bottom: 1px solid #ccc; }
+  th { background: #111; color: #fff; font-weight: 700; }
+  tr:nth-child(odd) td { background: #f3f3f3; }
+  td:first-child { font-weight: 700; width: 22%; }
+  .fig { border: 1px solid #bbb; border-radius: 10px; padding: 18px 24px; display: flex; gap: 24px; align-items: center; }
+  .fig svg { flex: none; display: block; }
+  .fig .cap { display: flex; flex-direction: column; gap: 8px; }
+  .axis { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; }
+  .axis .line { flex: 1; height: 3px; background: #111; }
+  .take { display: flex; gap: 32px; align-items: baseline; }
+  .take .n { flex: none; width: 44px; font-size: 50px; font-weight: 700; color: #bbb; }
+  .take p { font-size: 34px; line-height: 1.3; }
+  .refs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 48px; }
+  .refs p { font-size: 19px; }
+  .notes { display: none; }
+  #notesPanel { position: fixed; left: 0; right: 0; bottom: 0; height: 32vh; background: #f3f3f3;
+    border-top: 1px solid #bbb; padding: 14px 28px; overflow: auto; display: none;
+    font-size: 20px; line-height: 1.5; color: #111; }
+  #meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; margin-bottom: 10px;
+    font-size: 16px; color: #555; }
+  #meta b { color: #111; }
+  #meta button { font: inherit; font-weight: 700; color: #111; background: #fff;
+    border: 1px solid #111; padding: 4px 12px; cursor: pointer; }
+  #meta button:hover { background: #111; color: #fff; }
+  body.shownotes #notesPanel { display: block; }
+  #help { position: fixed; left: 12px; bottom: 8px; font-size: 12px; color: #999; }
+  body.shownotes #help { display: none; }
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { overflow: visible; height: auto; }
+    #viewport { position: static; }
+    #stage { position: static; transform: none !important; width: auto; height: auto; }
+    .slide { display: flex !important; position: relative; width: 1280px; height: 720px; page-break-after: always; }
+    #help, #notesPanel { display: none !important; }
+  }
+</style>
+</head>
+<body class="shownotes">
+<div id="viewport"><div id="stage">
+
+<section class="slide" style="justify-content:space-between; padding-bottom:64px">
+  <p class="muted" style="font-weight:700">ECE 587 · Extra Credit Presentation II · Fluorescence</p>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <h1>Calcium indicators</h1>
+    <p class="lead">How a flash of green light reports that a neuron just fired</p>
+  </div>
+  <p style="font-size:26px"><b>Howard Wang · Ting-Ruei Liu</b><br><span class="muted">Rice University · November 30, 2026</span></p>
+  <div class="notes">Hi everyone, we’re Howard and Ting-Ruei, and our topic is calcium indicators. The first group explained how fluorescence works. We pick up from there and ask: how do you make a fluorescent molecule whose brightness depends on neural activity? The most widely used answer is to watch calcium. We’ll cover why calcium follows spiking, how the GCaMP sensor works, how it compares with chemical dyes, and then the limits: photobleaching, slow kinetics, and what the sensor does to the cell.</div>
+</section>
+
+<section class="slide">
+  <h2>Why calcium tracks spiking</h2>
+  <div class="row">
+    <div class="box"><span class="step">Step 1</span><h3>A spike depolarizes the membrane</h3></div>
+    <span class="arrow">→</span>
+    <div class="box"><span class="step">Step 2</span><h3>Voltage-gated Ca²⁺ channels open</h3></div>
+    <span class="arrow">→</span>
+    <div class="box"><span class="step">Step 3</span><h3>Ca²⁺ rushes in and cytosolic Ca²⁺ jumps</h3></div>
+  </div>
+  <div class="cols3" style="margin-top:12px">
+    <div><p class="big">50–100 nM</p><p class="muted">Free Ca²⁺ in the cytosol of a resting neuron</p></div>
+    <div><p class="big">~10,000×</p><p class="muted">More Ca²⁺ outside the cell (about 1–2 mM) than inside</p></div>
+    <div><p class="big">10–100×</p><p class="muted">Transient rise in cytosolic Ca²⁺ during electrical activity</p></div>
+  </div>
+  <p class="source">Source: Grienberger &amp; Konnerth, Neuron (2012)</p>
+  <div class="notes">Why calcium? Because calcium entry is tightly coupled to the action potential. When a neuron spikes, the depolarization opens voltage-gated calcium channels and calcium flows in. The key is the size of the change. At rest, free calcium inside the cell is extremely low, about 50 to 100 nanomolar, while outside it is one to two millimolar. That is roughly a ten-thousand-fold gradient. So even a brief channel opening raises cytosolic calcium ten to a hundred times above baseline. Voltage itself changes by a factor of about two during a spike; calcium changes by orders of magnitude. That large, spike-triggered swing is what makes calcium such a convenient thing to measure.</div>
+</section>
+
+<section class="slide">
+  <h2>How GCaMP works</h2>
+  <div class="row">
+    <div class="box">
+      <h3 class="muted">No Ca²⁺: dim</h3>
+      <div class="state"><span class="pill">M13</span><div class="gfp">cpGFP</div><span class="pill">CaM</span></div>
+      <p class="small muted">Calmodulin (CaM) and the M13 peptide hang loose. The chromophore is exposed to water and mostly protonated, so it fluoresces weakly.</p>
+    </div>
+    <div style="flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:90px">
+      <span class="small" style="font-weight:700">+ Ca²⁺</span><span class="arrow">→</span>
+      <span class="arrow gray">←</span><span class="small muted" style="font-weight:700">− Ca²⁺</span>
+    </div>
+    <div class="box">
+      <h3>Ca²⁺ bound: bright</h3>
+      <div class="state"><div class="gfp on">cpGFP</div><span class="pill dark">CaM·Ca²⁺ clamps M13</span></div>
+      <p class="small muted">Ca²⁺-loaded CaM wraps M13 and closes the opening in the barrel. The chromophore deprotonates and emits bright green light.</p>
+    </div>
+  </div>
+  <div class="cols3">
+    <p><b>cpGFP:</b> GFP re-cut so an opening sits beside the chromophore</p>
+    <p><b>Sensor:</b> CaM binds up to four Ca²⁺ ions, then grabs M13</p>
+    <p><b>Readout:</b> ΔF/F, where brighter means more Ca²⁺</p>
+  </div>
+  <p class="source">Sources: Nakai et al., Nat. Biotechnol. (2001); Akerboom et al., J. Biol. Chem. (2009); Chen et al., Nature (2013)</p>
+  <div class="notes">GCaMP is one protein made of three parts fused together. In the middle is a circularly permuted GFP: the normal GFP barrel has been cut open and its ends re-joined, which leaves an opening right next to the chromophore. On one end is calmodulin, a natural calcium-binding protein, and on the other end is M13, a short peptide that calcium-bound calmodulin likes to grab. Without calcium, the two ends hang loose. Water reaches the chromophore, it stays mostly protonated, and it is dim under blue light. When calcium rises, calmodulin binds up to four calcium ions, wraps around M13, and the complex closes the opening. The chromophore becomes deprotonated and bright. It is reversible, so when calcium is pumped out the protein dims again.</div>
+</section>
+
+<section class="slide">
+  <h2>Protein sensors vs chemical dyes</h2>
+  <table>
+    <tr><th></th><th>Genetically encoded (GECI)</th><th>Chemical dye</th></tr>
+    <tr><td>Examples</td><td>GCaMP6, jGCaMP8</td><td>OGB-1, Fluo-4, Fura-2</td></tr>
+    <tr><td>Delivery</td><td>Virus or transgenic mouse</td><td>AM-ester loading or pipette</td></tr>
+    <tr><td>Cell targeting</td><td>Promoters and Cre lines</td><td>None: labels all nearby cells</td></tr>
+    <tr><td>Chronic imaging</td><td>Same cells for weeks–months</td><td>Hours, then the dye is lost</td></tr>
+    <tr><td>Response</td><td>Large ΔF/F, nonlinear</td><td>Faster, more linear</td></tr>
+    <tr><td>Main cost</td><td>Expression time, buffering</td><td>Invasive loading, buffering</td></tr>
+  </table>
+  <p style="font-size:26px">GECIs dominate chronic in vivo work; dyes still suit acute, fast experiments.</p>
+  <p class="source">Sources: Grienberger &amp; Konnerth, Neuron (2012); Lin &amp; Schnitzer, Nat. Neurosci. (2016)</p>
+  <div class="notes">Before GCaMP, the standard tools were synthetic dyes such as Oregon Green BAPTA, Fluo-4 and Fura-2. These are small molecules built on a calcium chelator. They are fast and fairly linear, and they are still used. But you have to physically load them, either by injecting a membrane-permeable form into tissue or through a pipette, and they label every cell nearby, neurons and glia alike. They also leak out within hours. Genetically encoded indicators solved those problems. Because the sensor is a gene, you can deliver it with a virus or a transgenic mouse, restrict it to a chosen cell type with a promoter or a Cre line, and return to the very same neurons for weeks or months. The price is that you wait for expression, the response is nonlinear, and both kinds of indicator buffer calcium.</div>
+</section>
+
+<section class="slide">
+  <h2>Limit: photobleaching</h2>
+  <div class="fig">
+    <svg id="bleachSvg" width="700" height="170" viewBox="0 0 1000 240" role="img" aria-label="Simulated fluorescence over ten minutes: the baseline decays and calcium events shrink with it"></svg>
+    <div class="cap">
+      <p class="small"><b>Solid line:</b> raw fluorescence F</p>
+      <p class="small"><b>Dashed line:</b> baseline F₀</p>
+      <p class="small muted">The same calcium event looks smaller late in the session, because fewer working sensors are left.</p>
+      <p class="small muted">Ten minutes of imaging (illustrative simulation)</p>
+    </div>
+  </div>
+  <div class="cols3">
+    <div><h3>The signal fades</h3><p class="small muted">Each excitation cycle carries a small risk of destroying the fluorophore, so brightness falls with exposure.</p></div>
+    <div><h3>ΔF/F drifts</h3><p class="small muted">F₀ changes over time and differs by cell and depth. Track a running baseline or events are mis-scaled.</p></div>
+    <div><h3>A light budget</h3><p class="small muted">More laser power buys photons now and a shorter experiment. Cells re-make GCaMP between sessions; a loaded dye is gone.</p></div>
+  </div>
+  <div class="notes">The first limit is photobleaching, which group one introduced. For calcium imaging it matters in three ways. First, every time a sensor molecule is excited there is a small chance it is destroyed, so the raw fluorescence slowly falls through a session, as in this simulated trace. Second, that drift breaks the measurement if you ignore it. We report delta F over F, and F-zero is not a constant: it decays, and it decays at different rates in different cells and depths. So analysis pipelines estimate a running baseline. Third, it sets a light budget. Turning up the laser gives a cleaner signal now but bleaches faster and can damage tissue, so you trade signal-to-noise against how long you can record. One advantage of a genetically encoded sensor is that the cell keeps making new protein, so the signal recovers between sessions.</div>
+</section>
+
+<section class="slide">
+  <h2>Calcium is slow</h2>
+  <div class="fig">
+    <svg id="slowSvg" width="720" height="210" viewBox="0 0 1000 290" role="img" aria-label="Simulated spikes and the calcium traces they produce; nearby spikes merge into one transient"></svg>
+    <div class="cap">
+      <p class="small"><b>Ticks:</b> spikes</p>
+      <p class="small" style="color:#777"><b>Gray:</b> sensitive, slow indicator</p>
+      <p class="small"><b>Black:</b> fast indicator</p>
+      <p class="small muted">The decay outlasts each spike by hundreds of milliseconds, so nearby spikes pile up.</p>
+    </div>
+  </div>
+  <div class="cols3">
+    <div><p class="big">~1 ms</p><p class="small muted">Duration of one action potential</p></div>
+    <div><p class="big">50–150 ms</p><p class="small muted">GCaMP6 rise to peak, from the fast to the sensitive variant</p></div>
+    <div><p class="big">~2 ms</p><p class="small muted">jGCaMP8 half-rise time: a faster onset, but the decay is still far longer than a spike</p></div>
+  </div>
+  <p class="source">Trace: illustrative simulation. Kinetics: Chen et al., Nature (2013); Zhang et al., Nature (2023)</p>
+  <div class="notes">The second limit is speed. An action potential lasts about a millisecond. The calcium signal it produces does not. Calcium has to enter, bind the sensor, the protein has to change shape, and then calcium has to be pumped back out. With GCaMP6 the fluorescence takes roughly 50 to 150 milliseconds to reach its peak, depending on the variant, and then decays over hundreds of milliseconds. You can see the consequence in this simulation. A single spike gives a small bump. Three spikes close together do not give three bumps; they merge into one larger transient. A burst of six becomes one big hill. The newest generation, jGCaMP8, has a much faster onset, around two milliseconds to half-rise, which helps with timing, but the decay is still much longer than the spike itself. So the fluorescence trace is a smoothed, delayed version of the spike train.</div>
+</section>
+
+<section class="slide">
+  <h2>From fluorescence back to spikes</h2>
+  <div class="row" style="gap:12px">
+    <div class="box mid"><h3>Spikes (hidden)</h3></div>
+    <span class="arrow gray">→</span>
+    <div class="box mid"><h3>Indicator blur plus noise</h3></div>
+    <span class="arrow gray">→</span>
+    <div class="box mid"><h3>ΔF/F (measured)</h3></div>
+    <span class="arrow">→</span>
+    <div class="box fill"><h3>Inferred spike rate</h3></div>
+  </div>
+  <div class="row" style="gap:24px">
+    <div class="box"><h3>Deconvolution</h3><p class="small muted">OASIS, CNMF. Assumes each spike adds a fixed exponential transient. Fast enough to run online.</p></div>
+    <div class="box"><h3>Generative model</h3><p class="small muted">MLspike. Fits baseline drift, saturation and noise separately for each cell.</p></div>
+    <div class="box"><h3>Supervised network</h3><p class="small muted">CASCADE. Trained on simultaneous electrical recording and imaging, then applied to new data.</p></div>
+  </div>
+  <p style="font-size:26px">Read the output as a firing rate: single spikes are often missed and bursts saturate.</p>
+  <p class="source">Sources: Pnevmatikakis 2016; Friedrich 2017; Deneux 2016; Rupprecht 2021; Huang 2021</p>
+  <div class="notes">Because the indicator blurs the spike train, we often want to undo the blur. That is spike inference. The idea is that the measured trace is the hidden spike train passed through the indicator’s response and corrupted by noise, and we try to run that backwards. There are three families of methods. Deconvolution methods such as OASIS, which is used inside CNMF and Suite2p, assume every spike adds the same exponential transient. Generative models like MLspike fit drift, saturation and noise for each cell. And supervised methods like CASCADE train a neural network on ground-truth data where the same neuron was recorded electrically and imaged at once. The honest caveat: under typical population-imaging conditions, isolated single spikes are often missed, and during bursts the sensor saturates. So the output is best treated as an estimate of firing rate, not a list of exact spike times.</div>
+</section>
+
+<section class="slide">
+  <h2>Biological concerns</h2>
+  <div class="row" style="gap:24px">
+    <div class="box"><h3>Calcium buffering</h3><p class="small muted">The indicator binds the Ca²⁺ it reports. At high expression it competes with the cell’s own buffers and can shrink and slow real calcium signals.</p></div>
+    <div class="box"><h3>Cell health</h3><p class="small muted">Long or strong expression can fill the nucleus, and those cells respond abnormally. GCaMP’s calmodulin can also disturb L-type Ca²⁺ channels; GCaMP-X shields it.</p></div>
+    <div class="box"><h3>Development</h3><p class="small muted">Some GCaMP6 mouse lines that express from early life show epileptiform cortical events. Keeping expression off until about 7 weeks prevented them.</p></div>
+  </div>
+  <p style="font-size:26px"><b>In practice:</b> use the lowest expression that gives a signal, prefer validated lines, and exclude nucleus-filled cells.</p>
+  <p class="source">Sources: Tian et al. (2009); Steinmetz et al. (2017); Yang et al. (2018); Gasterstädt et al. (2020)</p>
+  <div class="notes">A calcium indicator is not a passive observer, and there are three biological concerns. First, buffering. The sensor works by binding calcium, so it is itself a calcium buffer. If you express a lot of it, it competes with the cell’s own calcium-binding proteins and can make the real calcium signals smaller and slower. Second, cell health. With very strong or very long expression, GCaMP accumulates in the nucleus, and those filled cells show abnormal responses. Part of the reason is that GCaMP contains calmodulin, which can interfere with L-type calcium channels. A redesigned version called GCaMP-X shields the calmodulin to avoid this. Third, development. Several transgenic mouse lines that express GCaMP6 from early life show epilepsy-like events in cortex. When expression was kept off until about seven weeks of age, the events did not appear. So in practice: use the lowest expression that works, use validated lines, and exclude filled cells.</div>
+</section>
+
+<section class="slide">
+  <h2>The engineering tradeoff</h2>
+  <div class="axis"><span>← More signal per spike</span><span class="line"></span><span>Better timing →</span></div>
+  <div class="row" style="gap:24px">
+    <div class="box"><h3>Sensitive (-s)</h3><p class="small" style="font-weight:700;color:#666">GCaMP6s, jGCaMP8s</p><p class="small muted">Largest signal per spike and a slow decay. Best for sparse firing.</p></div>
+    <div class="box"><h3>Medium (-m)</h3><p class="small" style="font-weight:700;color:#666">GCaMP6m, jGCaMP8m</p><p class="small muted">A compromise for mixed firing patterns.</p></div>
+    <div class="box"><h3>Fast (-f)</h3><p class="small" style="font-weight:700;color:#666">GCaMP6f, jGCaMP8f</p><p class="small muted">Follows spike trains more closely, with a smaller signal per spike.</p></div>
+  </div>
+  <p class="lead" style="color:#111;font-weight:700">Tighter Ca²⁺ binding gives a bigger signal, but it lets go slowly and saturates sooner.</p>
+  <p class="source">Sources: Chen et al., Nature (2013); Zhang et al., Nature (2023)</p>
+  <div class="notes">These limits lead to an engineering tradeoff, which is why indicators come in families. Each generation of GCaMP is released as a sensitive version, a medium version and a fast version: 6s, 6m and 6f, and now 8s, 8m and 8f. The underlying reason is calcium binding. If the sensor holds calcium tightly, you get a large response even to one spike, but it releases calcium slowly, so the signal decays slowly, and it saturates sooner during bursts. If it binds more loosely, it follows spike trains better but each spike gives a smaller signal, so you need more photons. So there is no single best indicator. You choose based on the question: if you need to know whether a sparsely firing neuron fired at all, pick a sensitive one; if you care about timing or fast firing, pick a fast one.</div>
+</section>
+
+<section class="slide" style="gap:40px">
+  <h2>Take-home</h2>
+  <div class="take"><span class="n">1</span><p>Calcium is a proxy for spiking: spikes open Ca²⁺ channels, and GCaMP turns the Ca²⁺ rise into green light.</p></div>
+  <div class="take"><span class="n">2</span><p>It is a slow, nonlinear proxy: expect firing rates, not exact spike times.</p></div>
+  <div class="take"><span class="n">3</span><p>The sensor is not free: bleaching, buffering and expression all need controls.</p></div>
+  <div class="notes">To wrap up, three things to remember. One: calcium is a proxy for spiking. Spikes open calcium channels, calcium rises ten to a hundred fold, and GCaMP converts that rise into green fluorescence. Two: it is a slow and nonlinear proxy. The signal is delayed and smoothed, so what you can trust is firing rate, not exact spike times. That is the gap the next group’s topic, voltage imaging, is trying to close. Three: the sensor is not free. Photobleaching limits how long and how brightly you can image, and the protein itself buffers calcium and can affect the cell, so good experiments control for expression level. Thank you, and we’re happy to take questions.</div>
+</section>
+
+<section class="slide">
+  <h2>Study material</h2>
+  <div class="refs">
+    <p><b>Grienberger &amp; Konnerth.</b> Imaging calcium in neurons. Neuron (2012)</p>
+    <p><b>Zhang et al.</b> Fast and sensitive GCaMP calcium indicators for imaging neural populations. Nature (2023)</p>
+    <p><b>Lin &amp; Schnitzer.</b> Genetically encoded indicators of neuronal activity. Nat. Neurosci. (2016)</p>
+    <p><b>Rupprecht et al.</b> A database and deep learning toolbox for noise-optimized, generalized spike inference from calcium imaging. Nat. Neurosci. (2021)</p>
+    <p><b>Nakai et al.</b> A high signal-to-noise Ca²⁺ probe composed of a single green fluorescent protein. Nat. Biotechnol. (2001)</p>
+    <p><b>Steinmetz et al.</b> Aberrant cortical activity in multiple GCaMP6-expressing transgenic mouse lines. eNeuro (2017)</p>
+    <p><b>Akerboom et al.</b> Crystal structures of the GCaMP calcium sensor reveal the mechanism of fluorescence signal change and aid rational design. J. Biol. Chem. (2009)</p>
+    <p><b>Yang et al.</b> Improved calcium sensor GCaMP-X overcomes the calcium channel perturbations induced by the calmodulin in GCaMP. Nat. Commun. (2018)</p>
+    <p><b>Chen et al.</b> Ultrasensitive fluorescent proteins for imaging neuronal activity. Nature (2013)</p>
+  </div>
+  <div class="notes">These are the papers we used. The two reviews at the top, Grienberger and Konnerth, and Lin and Schnitzer, are the best starting points if you want to read more.</div>
+</section>
+
+</div></div>
+<div id="notesPanel"><div id="meta"><b id="count"></b><span>Time <b id="time">00:00</b></span><button id="reset" type="button">Reset timer</button><button id="aud" type="button">Open audience window</button></div><div id="script"></div></div>
+<div id="help">← → move · N script · F fullscreen</div>
+
+<script>
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  function el(svg, name, attrs) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    svg.appendChild(e);
+    return e;
+  }
+  function poly(svg, xs, ys, stroke, dash) {
+    var pts = [];
+    for (var i = 0; i < xs.length; i++) pts.push(xs[i].toFixed(1) + ',' + ys[i].toFixed(1));
+    var a = { points: pts.join(' '), fill: 'none', stroke: stroke, 'stroke-width': 3, 'stroke-linejoin': 'round' };
+    if (dash) a['stroke-dasharray'] = dash;
+    el(svg, 'polyline', a);
+  }
+
+  // Slide 6: spikes convolved with a fast and a slow indicator kernel
+  (function () {
+    var svg = document.getElementById('slowSvg');
+    var T = 5, dt = 0.005, n = Math.round(T / dt);
+    var spikes = [0.4, 1.3, 1.42, 1.54, 2.6, 2.66, 2.72, 2.78, 2.84, 2.9, 4.0];
+    function trace(rise, decay) {
+      var y = new Array(n).fill(0), kmax = 0, k = [];
+      for (var i = 0; i < n; i++) { k[i] = (1 - Math.exp(-i * dt / rise)) * Math.exp(-i * dt / decay); if (k[i] > kmax) kmax = k[i]; }
+      spikes.forEach(function (s) {
+        var s0 = Math.round(s / dt);
+        for (var i = s0; i < n; i++) y[i] += k[i - s0] / kmax;
+      });
+      return y;
+    }
+    var fast = trace(0.02, 0.2), slow = trace(0.08, 0.8);
+    var peak = Math.max.apply(null, slow), base = 282, scale = 205 / peak;
+    spikes.forEach(function (s) {
+      var x = s / T * 1000;
+      el(svg, 'line', { x1: x, x2: x, y1: 6, y2: 44, stroke: '#111', 'stroke-width': 3 });
+    });
+    el(svg, 'line', { x1: 0, x2: 1000, y1: base + 4, y2: base + 4, stroke: '#bbb', 'stroke-width': 2 });
+    var xs = [], yf = [], ys = [];
+    for (var i = 0; i < n; i += 2) { xs.push(i * dt / T * 1000); yf.push(base - fast[i] * scale); ys.push(base - slow[i] * scale); }
+    poly(svg, xs, ys, '#888');
+    poly(svg, xs, yf, '#111');
+  })();
+
+  // Slide 5: decaying baseline with calcium events riding on it
+  (function () {
+    var svg = document.getElementById('bleachSvg');
+    var T = 600, events = [40, 95, 150, 230, 300, 370, 450, 520, 570];
+    var xs = [], yb = [], yt = [];
+    for (var t = 0; t <= T; t += 1) {
+      var b = 0.45 + 0.55 * Math.exp(-t / 260), ev = 0;
+      events.forEach(function (e) { if (t >= e) ev += 0.55 * Math.exp(-(t - e) / 9); });
+      xs.push(t / T * 1000); yb.push(232 - b * 140); yt.push(232 - b * (1 + ev) * 140);
+    }
+    el(svg, 'line', { x1: 0, x2: 1000, y1: 236, y2: 236, stroke: '#bbb', 'stroke-width': 2 });
+    poly(svg, xs, yb, '#888', '10 8');
+    poly(svg, xs, yt, '#111');
+  })();
+
+
+  var chan = null;
+  try { chan = new BroadcastChannel('ece587-calcium-indicators'); } catch (e) {}
+  // Navigation
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var stage = document.getElementById('stage'), panel = document.getElementById('script');
+  var cur = 0;
+  slides.forEach(function (s, i) {
+    if (i > 0) { var n = document.createElement('span'); n.className = 'num'; n.textContent = (i + 1) + ' / ' + slides.length; s.appendChild(n); }
+  });
+  function fit() {
+    var h = window.innerHeight * (document.body.classList.contains('shownotes') ? 0.68 : 1);
+    var s = Math.min(window.innerWidth / 1280, h / 720);
+    stage.style.transform = 'translate(' + (-640 * s) + 'px,' + (-(window.innerHeight - h) / 2 - 360 * s) + 'px) scale(' + s + ')';
+  }
+  function show(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach(function (s, j) { s.classList.toggle('active', j === cur); });
+    var n = slides[cur].querySelector('.notes');
+    panel.textContent = n ? n.textContent : '';
+    document.getElementById('count').textContent = 'Slide ' + (cur + 1) + ' / ' + slides.length;
+    if (chan) chan.postMessage(cur);
+    try { history.replaceState(null, '', '#' + (cur + 1)); } catch (e) {}
+  }
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'ArrowRight' || k === 'PageDown' || k === ' ' || k === 'Enter') { show(cur + 1); e.preventDefault(); }
+    else if (k === 'ArrowLeft' || k === 'PageUp' || k === 'Backspace') { show(cur - 1); e.preventDefault(); }
+    else if (k === 'Home') show(0);
+    else if (k === 'End') show(slides.length - 1);
+    else if (k === 'n' || k === 'N') { document.body.classList.toggle('shownotes'); fit(); }
+    else if (k === 'f' || k === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+    }
+  });
+  document.getElementById('viewport').addEventListener('click', function (e) {
+    show(cur + (e.clientX < window.innerWidth / 3 ? -1 : 1));
+  });
+  window.addEventListener('resize', fit);
+  if (chan) chan.onmessage = function (e) { if (e.data === 'hello') chan.postMessage(cur); };
+  var t0 = Date.now(), timeEl = document.getElementById('time');
+  function tick() {
+    var s = Math.floor((Date.now() - t0) / 1000), m = Math.floor(s / 60); s = s % 60;
+    timeEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  setInterval(tick, 500);
+  document.getElementById('reset').addEventListener('click', function () { t0 = Date.now(); tick(); });
+  document.getElementById('aud').addEventListener('click', function () { window.open('./', 'calciumAudience'); });
+  var start = parseInt((location.hash || '').slice(1), 10);
+  fit();
+  show(start >= 1 ? start - 1 : 0);
+})();
+</script>
+</body>
+</html>
