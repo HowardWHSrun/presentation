@@ -17,8 +17,14 @@
   hr { border: 0; border-top: 2px solid var(--rule); margin: 0 0 8px; }
   ul { list-style: none; margin: 0; padding: 0; }
   li { border-bottom: 1px solid var(--rule); }
-  a.item { display: block; padding: 24px 0; color: inherit; text-decoration: none; }
-  a.item:hover .title, a.item:focus-visible .title { text-decoration: underline; }
+  .item { padding: 24px 0; }
+  .item a { color: inherit; }
+  a.title { display: block; text-decoration: none; }
+  a.title:hover, a.title:focus-visible { text-decoration: underline; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px 12px; margin-top: 14px; }
+  .links a { font-size: 17px; font-weight: 700; text-decoration: none; padding: 8px 16px; border: 2px solid var(--ink); }
+  .links a.primary { background: var(--ink); color: var(--paper); }
+  .links a:hover, .links a:focus-visible { text-decoration: underline; }
   .course { font-size: 16px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
   .title { font-size: 26px; font-weight: 700; margin: 4px 0; }
   .meta { font-size: 17px; color: var(--muted); }
@@ -33,14 +39,18 @@
   <hr>
   <ul>
     <li>
-      <a class="item" href="ece523-paper3/">
+      <div class="item">
         <div class="course">ECE 523 · Fall 2026 · Paper 3</div>
-        <div class="title">A Photo-Crosslinkable Fluoropolymer-Passivated Flexible Neural Probe</div>
+        <a class="title" href="ece523-paper3/">A Photo-Crosslinkable Fluoropolymer-Passivated Flexible Neural Probe</a>
         <div class="meta">Kim, Koo, Kim &amp; Jung, Biomaterials Advances 154 (2023) 213629 · 23 slides</div>
-      </a>
+        <div class="links">
+          <a class="primary" href="ece523-paper3/">View slides</a>
+          <a href="ece523-paper3/presenter.html">Presenter version (with script)</a>
+        </div>
+      </div>
     </li>
   </ul>
-  <p class="hint">In a deck: arrow keys or click to move, N for speaker notes, F for fullscreen.</p>
+  <p class="hint">In a deck: arrow keys or click to move, F for fullscreen. The presenter version adds the script, a timer and an audience window that follows along.</p>
 </main>
 </body>
 </html>

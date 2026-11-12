@@ -20,9 +20,15 @@
   .slide hr { margin: 0; border: 0; height: 0; flex: none; }
   .slide ul, .slide ol { margin: 0; padding-left: 1.15em; }
   .slide img { display: block; flex: none; }
-  #notes { display: none; flex: none; height: 30vh; overflow: auto; background: #fff; color: #000;
-           border-top: 2px solid #000; padding: 18px 28px; font-size: 22px; line-height: 1.5; }
-  #notes p { margin: 0 0 0.7em; max-width: 60em; }
+  #notes { display: none; flex: none; height: 36vh; overflow: auto; background: #fff; color: #000;
+           border-top: 2px solid #000; padding: 0 28px 18px; font-size: 22px; line-height: 1.5; }
+  #meta { position: sticky; top: 0; background: #fff; display: flex; flex-wrap: wrap; gap: 6px 28px; align-items: baseline;
+          padding: 12px 0 10px; margin-bottom: 12px; border-bottom: 1px solid #ccc;
+          font: 15px/1.3 Arial, sans-serif; color: #555; }
+  #meta b { color: #000; font-size: 18px; }
+  #meta button { font: inherit; color: #000; background: none; border: 1px solid #000; border-radius: 4px; padding: 3px 10px; cursor: pointer; }
+  #meta .next { flex: 1; min-width: 12em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #script p { margin: 0 0 0.7em; max-width: 60em; }
   body.notes #notes { display: block; }
   #bar { position: fixed; right: 14px; top: 10px; font: 13px/1 Arial, sans-serif; color: #fff;
          background: rgba(0,0,0,.6); padding: 7px 10px; border-radius: 6px; opacity: 0; transition: opacity .3s; pointer-events: none; }
@@ -505,30 +511,53 @@
 <p style="position:absolute;right:112px;bottom:48px;width:120px;font-size:28px;color:#000000;text-align:right">23</p>
 </section>
   </div></div>
-  <div id="notes" aria-live="polite"></div>
 </div>
-<div id="bar">← → move · N notes · F fullscreen</div>
+<div id="bar">← → move · F fullscreen</div>
 <script>
 (function () {
-  var NOTES = ["Hi everyone, I’m Howard. I’m presenting paper 3, from Kim and colleagues at ETRI in Korea, published in Biomaterials Advances in 2023.\n\nIn one sentence: they built a soft brain probe from Teflon-like plastics, using a new insulating layer that can be patterned with light and still survives hot nitric acid. That acid step is what gives them a high-performance electrode coating. Then they used a single probe to both stimulate and record in a rat’s hippocampus.", "There are five parts. First the motivation, then how the probe is made, which is the heart of the paper. Then how the electrodes perform on the bench, and then the in vivo results, meaning in living rats. I’ll finish with the limitations and takeaways.\n\nI’ll explain the jargon as we go.", "Brain–computer interfaces and memory prostheses need electrodes that can both record from neurons and stimulate them.\n\nThat means three things. The probe should be soft, because stiff silicon causes scarring in the brain over time. It needs low impedance, which is how much the electrode resists the signal. Lower means cleaner recordings. And it needs high charge injection, which is how much current it can safely push into tissue.\n\nBoth of those improve with surface area. So this group uses iridium oxide on nanoporous gold. That’s the picture on the right: a gold sponge, with a huge surface area inside a tiny electrode.", "Three measurements come up again and again, so here they are once.\n\nImpedance is on the left. You sweep the frequency of a small AC signal. It’s usually quoted at one kilohertz, about the frequency of a neural spike. Lower is better.\n\nCharge storage is in the middle. You sweep the voltage back and forth, and the area of the loop is the total charge the surface can hold.\n\nThe charge injection limit is on the right, and it’s the one that matters for stimulation. It’s the most charge you can deliver in a short pulse before the voltage leaves the safe window.\n\nMore surface area improves all three.", "Now the catch. Nanoporous gold is made by depositing a silver–gold alloy and then dissolving the silver in nitric acid at 70 degrees. Most flexible-probe plastics can’t survive that.\n\nThis group hit that problem twice. In 2017 they used FEP, a Teflon-like film, bonded with heat and pressure. It survived, but it was slow. In 2020 they switched to SU-8, a photoresist, which is a polymer that hardens where UV light hits it. That was fast, but it failed in the acid.\n\nThis paper swaps in a new material, PFPE-UA, and it survives.", "Why does it work? It’s two materials joined together.\n\nThe middle is PFPE, a chemical cousin of Teflon. It’s inert and it repels water, which matters because water creeping under the insulation is a main way implants fail.\n\nThe ends are UA groups, which link together under UV light. That’s what makes it a photoresist.\n\nSo you can pattern it like SU-8, and it resists acid like Teflon.", "This is figure 1, the whole device, with four ideas labeled A to D.\n\nA: the probe is cut out with a femtosecond laser. The pulses are so short that it cuts without melting the plastic, and there’s no mask.\n\nB: the PFPE-UA layer, in blue, is bonded and patterned in a single UV exposure. More on that in a moment.\n\nC: the gold wiring sits directly on the plastic, with no adhesion metal underneath that could corrode.\n\nD: the electrode coating, iridium oxide on nanoporous gold.", "Here’s the process in eight steps.\n\nClean the FEP sheet with plasma, which is ionized gas. Deposit gold. Pattern it into sixteen electrodes and their wires. Then a gentle second plasma, so the next layer can bond.\n\nStep five is the key one. They spin on PFPE-UA, expose it to UV through a mask, and develop it, which leaves a 20-micron opening over each electrode.\n\nThen the laser cuts out the probe, the acid bath turns each electrode into porous gold, and the last step adds iridium oxide.\n\nThe two black steps are the point of the paper. Step seven only works because of step five.", "Let’s look at step five more closely. Teflon-like plastics are famously non-stick, so how do you glue a layer on?\n\nThe plasma breaks bonds at the FEP surface and leaves reactive sites. When UV hits the PFPE-UA, it hardens and bonds to those sites at the same moment. Then a solvent washes away the unexposed parts.\n\nSo one exposure both glues the layer down and defines the openings. If they skip the plasma, the patterns wash off.\n\nOn the right, features from 10 to 25 microns come out clean, which is enough for 20-micron electrodes. One caveat: they couldn’t measure the bond strength.", "Is the new material toxic? They soaked it in cell culture medium for a day and grew cells in that liquid. Living cells turn a dye purple, so the color tells you how many survived.\n\nWith PFPE-UA, 99.3 percent survived, the same as the safe plastic control. Latex, the toxic control, left about 28 percent.\n\nSo there’s no short-term toxicity. But it’s only a 24-hour test.", "Here’s the finished probe. The top row shows it on its connector, and the clean, sharp laser-cut tip.\n\nThe bottom row is the key result. On the left is an electrode after fifteen minutes in hot nitric acid. The insulation around the opening hasn’t cracked or peeled. This is where SU-8 failed. Next to it are the porous gold, and the iridium oxide on top.\n\nIt also survived the strongly basic iridium oxide bath.\n\nSo the fabrication works. How do the electrodes perform?", "They measured at three stages: bare gold, porous gold, and porous gold with iridium oxide.\n\nOn the left is impedance, on a log scale, where lower is better. It goes from 510 kilo-ohms to 29, and then to 4.6. That’s about 110 times lower.\n\nIn the middle, charge storage goes from almost nothing, to 3.8, to 13.\n\nOn the right is the charge injection limit, the number for stimulation. Porous gold gives about 1, and iridium oxide takes it to 5.18.\n\nThe porous gold adds surface area, and the iridium oxide adds a reversible reaction that stores extra charge. The two effects stack.", "Is 5.18 good? Here it is next to values from the literature.\n\nStandard iridium oxide is between 1 and 5. Platinum–iridium, titanium nitride and porous platinum are between about 4 and 4.5. This work is at the top of that group.\n\nPolymer and carbon-nanotube composites go above 7, but they aren’t approved for implants. So the claim is that among FDA-approved materials, this is one of the highest. These numbers come from different labs, so the comparison is rough.\n\nNow, does it work in a brain?", "The experiments are in the hippocampus, the brain’s memory center, so here’s a quick primer.\n\nOn the left is its best-known circuit. Neurons in CA3 send fibres, called Schaffer collaterals, to neurons in CA1. You stimulate the fibres and record in CA1.\n\nThere are three things to look for. The fEPSP is the combined response of many synapses. The steeper its slope, the stronger the connection.\n\nPaired-pulse facilitation: give two pulses close together, and the second response is larger. It shows the synapses are healthy.\n\nAnd LTP, long-term potentiation: after a strong burst, the connection stays stronger for an hour or more. It’s the classic cellular model of learning.\n\nA probe that shows all three is good enough for memory research.", "These are acute experiments, a single session in an anesthetized rat, in three animals.\n\nThe probe goes in at a 20-degree tilt. That puts the bottom electrode, in black, on the Schaffer collaterals, for stimulating. The electrodes above it sit in CA1, for recording.\n\nNormally this takes two separate electrodes. Here one flexible probe does both.", "First they checked that it can record. This is figure 4.\n\nPanel A is from the cortex. The spikes, the pulses that single neurons fire, are three to six times bigger than the noise.\n\nIn panel B they sort the spikes by shape and get two clusters, so the probe can tell two types of neurons apart.\n\nPanel C is from CA1 in the hippocampus, with clear spikes from a single neuron.\n\nSo the low impedance carries over into real tissue.", "Now they stimulate. Panel A is the control: stimulating in the cortex gives no synaptic response. In panel B, stimulating the Schaffer collaterals gives clear fEPSPs that grow with current and then level off, as panel C shows.\n\nWhat stands out is how little charge it takes: about 3.4 nanocoulombs per pulse for a half-maximum response. Typical studies use 10 to 1,000, and a recent platinum–iridium microwire needed about 6. The setups differ, so it’s a rough comparison, but it fits the high charge injection limit.\n\nPanels D and E show paired-pulse facilitation. The second response is about 32 percent larger.", "The last result is LTP.\n\nThey recorded a baseline, then delivered theta-burst stimulation through the bottom electrode. That’s a pattern of short, high-frequency bursts known to trigger LTP. Then they recorded for an hour.\n\nIn panel B the response jumps at the arrow and stays up. At 60 minutes it’s still at 120 to 140 percent of baseline.\n\nSo stimulation, plasticity and recording all went through one flexible probe. The effect is smaller than in classic studies and varies by channel, which the authors put down to electrode position.\n\n(Only if asked: the theta-burst protocol in the figure 6 caption doesn’t match the methods section.)", "How does this compare with other probes?\n\nMicrowires can stimulate and evoke LTP, but they have few sites. Thin multishank polymer probes have many sites, but they’ve only been used to record. Other silicon and polymer probes haven’t shown evoked responses either.\n\nThis is the only one with all three. The trade-off is size: this shank is wider and thicker than the others.", "That leads to the limitations.\n\nFirst, size. The shank is about 100 by 200 microns, and a bigger probe does more damage going in. The authors think better lithography could halve the width.\n\nSecond, everything is acute. There’s no long-term data on impedance or on how the tissue responds.\n\nThird, the LTP is modest and uneven.\n\nFourth, the toxicity test covers only 24 hours.\n\nFifth, the bond between the insulation and the base was never measured.\n\nIt’s also only three rats.", "Three things to remember.\n\nOne: PFPE-UA is a photoresist that survives hot nitric acid, which makes nanoporous gold possible on a flexible probe.\n\nTwo: the electrodes reach 4.6 kilo-ohms and a charge injection limit of 5.18, among the best for approved materials.\n\nThree: one flexible probe stimulated and recorded in the hippocampus, evoking responses with about 3.4 nanocoulombs and LTP that lasted over an hour.\n\nThe open question is long-term performance.\n\nBefore we finish, one quick quiz.", "Why did the authors replace SU-8 with PFPE-UA? Is it A, because it’s cheaper? B, because it survives hot nitric acid? Or C, because it conducts electricity?\n\nTake a second to pick one.", "The answer is B. SU-8 failed in the hot acid bath, and PFPE-UA survives it. That’s what let them make the nanoporous gold electrodes on a flexible probe.\n\nThank you. I’m happy to take questions."];
+  var PRESENTER = false;
+  var NOTES = [];
+  var TITLES = [];
+  var VIEWER_URL = "";
   var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
   var stage = document.getElementById('stage'), view = document.getElementById('view');
-  var notes = document.getElementById('notes');
-  var i = 0;
+  var script = document.getElementById('script');
+  var elCount = document.getElementById('count'), elTime = document.getElementById('time'), elNext = document.getElementById('next');
+  var i = 0, t0 = null, ch = null;
+  try {
+    ch = new BroadcastChannel('deck-ece523-paper3');
+    ch.onmessage = function (e) {
+      if (e.data && typeof e.data.i === 'number' && e.data.i !== i) show(e.data.i, true);
+    };
+  } catch (e) { ch = null; }
   function fit() {
     var w = view.clientWidth, h = view.clientHeight;
     var s = Math.min(w / 1920, h / 1080);
     stage.style.transform = 'translate(' + (w - 1920 * s) / 2 + 'px,' + (h - 1080 * s) / 2 + 'px) scale(' + s + ')';
   }
-  function show(n) {
+  function clock() {
+    if (!elTime) return;
+    var sec = t0 === null ? 0 : Math.floor((Date.now() - t0) / 1000);
+    var m = Math.floor(sec / 60), r = sec % 60;
+    elTime.textContent = (m < 10 ? '0' : '') + m + ':' + (r < 10 ? '0' : '') + r;
+  }
+  function show(n, silent) {
+    var prev = i;
     i = Math.max(0, Math.min(slides.length - 1, n));
     slides.forEach(function (el, k) { el.classList.toggle('on', k === i); });
-    notes.innerHTML = '';
-    NOTES[i].split(/\n\s*\n/).forEach(function (t) {
-      var p = document.createElement('p'); p.textContent = t; notes.appendChild(p);
-    });
-    notes.scrollTop = 0;
+    if (PRESENTER) {
+      script.innerHTML = '';
+      NOTES[i].split(/\n\s*\n/).forEach(function (t) {
+        var p = document.createElement('p'); p.textContent = t; script.appendChild(p);
+      });
+      document.getElementById('notes').scrollTop = 0;
+      elCount.textContent = (i + 1) + ' / ' + slides.length;
+      elNext.textContent = i + 1 < slides.length ? 'Next: ' + TITLES[i + 1] : 'Last slide';
+      if (t0 === null && i !== prev) { t0 = Date.now(); }
+      clock();
+    }
     try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+    if (!silent && ch) { try { ch.postMessage({ i: i }); } catch (e) {} }
   }
   document.addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -537,7 +566,7 @@
     else if (k === 'ArrowLeft' || k === 'ArrowUp' || k === 'PageUp' || k === 'Backspace') { show(i - 1); e.preventDefault(); }
     else if (k === 'Home') show(0);
     else if (k === 'End') show(slides.length - 1);
-    else if (k === 'n' || k === 'N') { document.body.classList.toggle('notes'); fit(); }
+    else if (PRESENTER && (k === 'n' || k === 'N')) { document.body.classList.toggle('notes'); fit(); }
     else if (k === 'f' || k === 'F') {
       if (document.fullscreenElement) document.exitFullscreen();
       else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
@@ -546,13 +575,20 @@
   view.addEventListener('click', function (e) {
     show(i + (e.clientX < view.clientWidth * 0.3 ? -1 : 1));
   });
+  if (PRESENTER) {
+    document.getElementById('reset').addEventListener('click', function () { t0 = null; clock(); });
+    document.getElementById('aud').addEventListener('click', function () {
+      window.open(VIEWER_URL + '#' + (i + 1), 'deck-audience');
+    });
+    setInterval(clock, 1000);
+  }
   window.addEventListener('resize', fit);
   window.addEventListener('hashchange', function () {
     var n = parseInt((location.hash || '').slice(1), 10);
     if (!isNaN(n) && n - 1 !== i) show(n - 1);
   });
   var start = parseInt((location.hash || '').slice(1), 10);
-  fit(); show(isNaN(start) ? 0 : start - 1);
+  fit(); show(isNaN(start) ? 0 : start - 1, true);
   setTimeout(function () { document.body.classList.remove('hint'); }, 4000);
 })();
 </script>
